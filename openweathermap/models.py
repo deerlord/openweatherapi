@@ -125,3 +125,50 @@ class OneCallAPIResponse(BaseModel):
     hourly: List[Hourly] = []
     daily: List[Daily] = []
     alerts: List[Alert] = []
+
+{
+  "coord":[
+    50,
+    50
+  ],
+  "list":[
+    {
+      "dt":1605182400,
+      "main":{
+        "aqi":1
+      },
+      "components":{
+        "co":201.94053649902344,
+        "no":0.01877197064459324,
+        "no2":0.7711350917816162,
+        "o3":68.66455078125,
+        "so2":0.6407499313354492,
+        "pm2_5":0.5,
+        "pm10":0.540438711643219,
+        "nh3":0.12369127571582794
+      }
+    }
+  ]
+}
+
+
+class AirPollutionComponents(BaseModel):
+    co: float
+    no: float
+    no2: float
+    o3: float
+    so2: float
+    pm2_5: float
+    pm10: float
+    nh3: float
+
+
+class AirPollution(BaseModel):
+    dt: int
+    main: dict
+    components: AirPollutionComponents
+
+
+class AirPollutionAPIResponse(BaseModel):
+    coord: list
+    list: AirPollution

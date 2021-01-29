@@ -59,39 +59,10 @@ class OpenWeatherClient:
         )
         return result
 
-    async def one_call_old(self) -> models.OneCallAPIResponse:
-        """
-        Returns a full response for the One Call endpoint
-
-        Raises openweatherapi.exceptions.ResponseMalformed
-        """
-        result = await self._api_request(
-            url="onecall", params={"lat": self.lat, "lon": self.lon}
-        )
-        try:
-            response = models.OneCallAPIResponse(**result)
-        except PydanticValidationError as error:
-            message = (
-                f"Error: Unable to parse One Call API body - {error}"
-                f"\nCalled with arguments: {result}"
-            )
-            logging.error(message)
-            raise exceptions.ResponseMalformed()
-        return response
-
     async def air_pollution(self):
         result = await self._api_request(
             url="air_pollution", params={"lat": self.lat, "lon": self.lon}
         )
-        try:
-            response = models.AirPollutionResponse(**result)
-        except PydanticValidationError as error:
-            message = (
-                f"Error: Unable to parse One Call API body - {error}"
-                f"\nCalled with arguments: {result}"
-            )
-            logging.error(message)
-            raise exceptions.ResponseMalformed()
 
     async def icon(self, icon_id: str) -> bytes:
         result = None
