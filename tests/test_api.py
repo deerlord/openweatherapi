@@ -75,15 +75,14 @@ class TestAPI(unittest.TestCase):
                 status=500,
             )
             self.assertRaises(
-                exceptions.BadRequest,
-                asyncio.run,
-                self.client._api_request(url="")
+                exceptions.BadRequest, asyncio.run, self.client._api_request(url="")
             )
-        #self.assertDictEqual(result, {})
+        # self.assertDictEqual(result, {})
 
     def test_units(self):
         self.client.units = "METRIC"
         self.assertEqual(self.client.units, "metric")
+
     """
     def test_one_call_old(self):
         with responses() as resps:
@@ -107,6 +106,7 @@ class TestAPI(unittest.TestCase):
             with self.assertRaises(exceptions.ResponseMalformed):
                 asyncio.run(self.client.one_call())
     """
+
     def test_icon(self):
         with responses() as resps:
             resps.get(
@@ -137,4 +137,3 @@ class TestAPI(unittest.TestCase):
             )
             result = asyncio.run(self.client.one_call())
         self.assertDictEqual(result.dict(), fixtures.ONE_CALL_API_AS_DICT)
-

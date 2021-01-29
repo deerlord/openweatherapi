@@ -55,7 +55,7 @@ class OpenWeatherClient:
     @wrappers.model_return(model=models.OneCallAPIResponse)
     async def one_call(self):
         result = await self._api_request(
-            url="onecall", params={'lat': self.lat, 'lon': self.lon}
+            url="onecall", params={"lat": self.lat, "lon": self.lon}
         )
         return result
 

@@ -14,7 +14,8 @@ def model_return(model: BaseModel):
         async def caller(*args, **kwargs):
             result = await func(*args, **kwargs)
             if not isinstance(result, dict):
-                raise exceptions
+                message = f"Wrapped function returned {type(result)} instead of a dict"
+                raise TypeError(message)
             try:
                 response = model(**result)
             except PydanticValidationError as error:
