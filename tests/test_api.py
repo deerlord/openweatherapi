@@ -84,8 +84,8 @@ class TestAPI(unittest.TestCase):
     def test_units(self):
         self.client.units = "METRIC"
         self.assertEqual(self.client.units, "metric")
-
-    def test_one_call(self):
+    """
+    def test_one_call_old(self):
         with responses() as resps:
             resps.get(
                 "https://api.openweathermap.org/data/2.5/"
@@ -93,7 +93,7 @@ class TestAPI(unittest.TestCase):
                 payload=fixtures.ONE_CALL_API_RESPONSE_INPUT,
                 status=200,
             )
-            result = asyncio.run(self.client.one_call())
+            result = asyncio.run(self.client.one_call_old())
         self.assertDictEqual(result.dict(), fixtures.ONE_CALL_API_AS_DICT)
 
     def test_one_call_response_malformed(self):
@@ -106,7 +106,7 @@ class TestAPI(unittest.TestCase):
             )
             with self.assertRaises(exceptions.ResponseMalformed):
                 asyncio.run(self.client.one_call())
-
+    """
     def test_icon(self):
         with responses() as resps:
             resps.get(
@@ -126,3 +126,15 @@ class TestAPI(unittest.TestCase):
             )
             with self.assertRaises(exceptions.IconNotFound):
                 asyncio.run(self.client.icon("01d"))
+
+    def test_one_call(self):
+        with responses() as resps:
+            resps.get(
+                "https://api.openweathermap.org/data/2.5/"
+                "onecall?lat=0.0&lon=0.0&units=imperial",
+                payload=fixtures.ONE_CALL_API_RESPONSE_INPUT,
+                status=200,
+            )
+            result = asyncio.run(self.client.one_call())
+        self.assertDictEqual(result.dict(), fixtures.ONE_CALL_API_AS_DICT)
+
