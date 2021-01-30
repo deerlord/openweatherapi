@@ -1,7 +1,7 @@
 import asyncio
 from unittest import TestCase
 
-from aioresponses import aioresponses as responses
+from aioresponses import aioresponses as responses  # type: ignore
 
 from openweathermap import api, exceptions
 from tests.fixtures import openweatherapi as fixtures
