@@ -146,4 +146,4 @@ async def icon(self, icon_id: str) -> bytes:
     return result
 
 
-OPENWEATHER_MAX_ZOOM = 50  # maybe not accurate
+OPENWEATHERMAP_MAX_ZOOM = 50  # maybe not accurate
