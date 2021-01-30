@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 import aiohttp  # type: ignore
 
 from openweathermap import exceptions, models, wrappers
+from typing import Dict, Any
 
 
 # TESTED
@@ -18,7 +19,7 @@ class OpenWeatherBase:
         result = f"{self.base_url}/{url}"
         return result
 
-    async def _api_request(self, url: str, params: dict = {}) -> dict:
+    async def _api_request(self, url: str, params: Dict[str, Any] = {}) -> dict:
         result = {}
         async with aiohttp.ClientSession() as session:
             async with (session.get(self._url_formatter(url), params=params)) as resp:
