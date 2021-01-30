@@ -7,7 +7,6 @@ import asyncio
 from openweathermap.wrappers import model_return
 
 
-
 class TestWrappers(TestCase):
     def setUp(self):
         pass
@@ -22,8 +21,5 @@ class TestWrappers(TestCase):
 
         result = asyncio.run(func())
         self.assertDictEqual(
-            result.dict(),
-            EXAMPLE_MODEL_DICT,
-            'Incorrect dictionary returned'
+            result.dict(), EXAMPLE_MODEL_DICT, "Incorrect dictionary returned"
         )
-

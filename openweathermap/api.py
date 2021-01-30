@@ -7,20 +7,51 @@ from pydantic.error_wrappers import ValidationError as PydanticValidationError
 from openweathermap import exceptions, models, wrappers
 
 
+# TESTED
 @dataclass
-class OpenWeatherClient:
+class OpenWeatherBase:
+    api_key: str
+    base_url = ""
+
+    def _url_formatter(self, url: str) -> str:
+        url = url[1:] if url.startswith("/") else url
+        result = f"{self.base_url}/{url}"
+        return result
+
+    async def _api_request(self, url: str, params: dict = {}) -> dict:
+        result = {}
+        async with aiohttp.ClientSession() as session:
+            async with (session.get(self._url_formatter(url), params=params)) as resp:
+                if resp.status == 200:
+                    result = await resp.json()
+                else:
+                    message = f"{resp.url} returns {resp.status}"
+                    logging.error(message)
+                    raise exceptions.BadRequest(resp.status)
+        return result
+
+
+# NEED TESTS
+@dataclass
+class OpenWeatherData(OpenWeatherBase):
+    """
+    Documentation at: https://openweathermap.org/api/one-call-api
+    """
     api_key: str
     lat: float
     lon: float
-    version: str = "2.5"
     __units: str = field(init=False, default="imperial")
+    base_url = "https://api.openweathermap.org/data/2.5"
 
-    def __post_init__(self):
-        self._base_url = f"https://api.openweathermap.org/data/{self.version}"
-
-    def set_location(self, latitude: str, longitude: str):
-        self.lat = latitude
-        self.lon = longitude
+    # NOT TESTED
+    @property
+    def params(self):
+        return {
+            "lat": self.lat,
+            "lon": self.lon,
+            "appid": self.api_key,
+            "units": self.units,
+        }
 
     @property
     def units(self) -> str:
@@ -31,48 +62,62 @@ class OpenWeatherClient:
         if value.lower() in ["standard", "metric", "imperial"]:
             self.__units = value.lower()
 
-    def _url_formatter(self, url: str) -> str:
-        url = url[1:] if url.startswith("/") else url
-        return f"{self._base_url}/{url}"
-
-    async def _api_request(
-        self,
-        url: str,
-        params: dict = {},
-    ) -> dict:
-        result = {}
-        params.update({"appid": self.api_key, "units": self.units})
-        async with aiohttp.ClientSession() as session:
-            async with (session.get(self._url_formatter(url), params=params)) as resp:
-                if resp.status == 200:
-                    result = await resp.json()
-                else:
-                    message = f"{resp.url} returned {resp.status}"
-                    logging.error(message)
-                    raise exceptions.BadRequest(resp.status)
-        return result
-
+    # TESTED
     @wrappers.model_return(model=models.OneCallAPIResponse)
     async def one_call(self):
-        result = await self._api_request(
-            url="onecall", params={"lat": self.lat, "lon": self.lon}
-        )
+        result = await self._api_request(url="onecall", params=self.params)
         return result
 
+    # NOT TESTED
+    @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution(self):
-        result = await self._api_request(
-            url="air_pollution", params={"lat": self.lat, "lon": self.lon}
-        )
-
-    async def icon(self, icon_id: str) -> bytes:
-        result = None
-        url = f"http://openweathermap.org/img/wn/{icon_id}@2x.png"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                if resp.status == 200:
-                    result = await resp.read()
-                else:
-                    message = f"{resp.url} returned {resp.status}"
-                    logging.error(message)
-                    raise exceptions.IconNotFound()
+        result = await self._api_request(url="air_pollution", params=self.params)
         return result
+
+
+class OpenWeatherMap(OpenWeatherBase):
+    """
+    Documentation at: https://openweathermap.org/api/weathermaps
+    """
+    base_url = "https://tile.openweathermap.org/map"
+    tile_x: int
+    tile_y: int
+    zoom: int
+
+    # NOT TESTED
+    async def _basic_request(self, layer: str, x: int, y: int, z: int):
+        url = f"/{layer}/{z}/{x}/{y}.png"
+        result = await self._api_request(url=url, params={"appid": self.api_key})
+        return result
+
+    # NOT TESTED
+    async def zoom_in(self):
+        self.zoom = min(self.zoom + 1, OPENWEATHERMAP_MAX_ZOOM)
+
+    # NOT TESTED
+    async def zoom_out(self):
+        self.zoom -= max(self.zoom - 1, 0)
+
+    # NOT TESTED
+    async def clouds(self):
+        result = await self._basic_request(
+            layer="clouds_new", x=self.tile_x, y=self.tile_y, z=self.zoom
+        )
+        return result
+
+
+async def icon(self, icon_id: str) -> bytes:
+    result = b''
+    url = f"http://openweathermap.org/img/wn/{icon_id}@2x.png"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                result = await resp.read()
+            else:
+                message = f"{resp.url} returned {resp.status}"
+                logging.error(message)
+                raise exceptions.IconNotFound()
+    return result
+
+
+OPENWEATHER_MAX_ZOOM = 50  # maybe not accurate
