@@ -63,7 +63,7 @@ class TestOpenWeatherMap(TestCase):
                 resps.get(
                     f"https://tile.openweathermap.org/map/{layer}_new/0/0/0.png?appid=",
                     status=200,
-                    payload={}
+                    payload={},
                 )
                 response = getattr(self.client, layer)
                 results.append(response)
