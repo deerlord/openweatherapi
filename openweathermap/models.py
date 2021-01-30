@@ -168,3 +168,11 @@ class AirPollution(BaseModel):
 class AirPollutionAPIResponse(BaseModel):
     coord: list
     list: AirPollution
+
+
+class GeocodingAPIResponse(BaseModel):
+    name: str
+    lat: float
+    lon: float
+    country: str
+    local_names: dict

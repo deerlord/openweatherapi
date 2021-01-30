@@ -4,13 +4,11 @@ from typing import Type
 
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
+
 from openweathermap import exceptions
 
 
 def model_return(model: Type[BaseModel]):
-    # take in base model
-    # run results from method through mode
-    # raise/log if exception
     def wrapper(func):
         @wraps(func)
         async def caller(*args, **kwargs):
