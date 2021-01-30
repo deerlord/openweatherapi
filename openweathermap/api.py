@@ -137,19 +137,14 @@ class OpenWeatherGeocoding(OpenWeatherBase):
     base_url = "https://api.openweathermap.org/geo/1.0"
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
-    async def geocode(self, city: str, state: str, country: str, limit: int = None) -> dict:
-        params = {
-            'appid': self.api_key,
-            'q': f'{city},{state},{country}'
-        }
+    async def geocode(
+        self, city: str, state: str, country: str, limit: int = None
+    ) -> dict:
+        params = {"appid": self.api_key, "q": f"{city},{state},{country}"}
         if limit:
-            params.update({'limit': limit})
-        result = await self._api_request(
-            url="/direct",
-            params=params
-        )
+            params.update({"limit": limit})
+        result = await self._api_request(url="/direct", params=params)
         return result
-
 
 
 async def icon(self, icon_id: str) -> bytes:
