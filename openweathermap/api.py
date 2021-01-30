@@ -106,13 +106,14 @@ class OpenWeatherMap(OpenWeatherBase):
     async def zoom_out(self):
         self.zoom -= max(self.zoom - 1, 0)
 
-    # NOT TESTED
+    # partially tested, needs fallback
     def __getattribute__(self, attr):
         # enables map endpoints to accessed without repetitive code
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
             result = asyncio.run(self._basic_request(
                 layer=f"{attr}_new", x=self.tile_x, y=self.tile_x, z=self.zoom
             ))
+            # possibly needs model
         else:
             return super().__getattribute__(attr) 
         return result
