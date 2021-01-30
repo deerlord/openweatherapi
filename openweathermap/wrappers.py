@@ -4,6 +4,7 @@ from typing import Type
 
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
+from openweathermap import exceptions
 
 
 def model_return(model: Type[BaseModel]):
