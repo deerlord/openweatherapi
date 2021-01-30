@@ -1,11 +1,11 @@
 import asyncio
 import logging
 from dataclasses import dataclass, field
+from typing import Any, Dict
 
 import aiohttp  # type: ignore
 
 from openweathermap import exceptions, models, wrappers
-from typing import Dict, Any
 
 
 # TESTED
@@ -143,7 +143,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
     ) -> dict:
         params = {"appid": self.api_key, "q": f"{city},{state},{country}"}
         if limit:
-            params.update({"limit": limit})
+            params["limit"] = limit
         result = await self._api_request(url="/direct", params=params)
         return result
 
