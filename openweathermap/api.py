@@ -1,8 +1,8 @@
+import asyncio
 import logging
 from dataclasses import dataclass, field
 
 import aiohttp  # type: ignore
-import asyncio
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 
 from openweathermap import exceptions, models, wrappers
@@ -66,19 +66,32 @@ class OpenWeatherData(OpenWeatherBase):
 
     # TESTED
     @wrappers.model_return(model=models.OneCallAPIResponse)
-    async def one_call(self):
+    async def one_call(self) -> models.OneCallAPIResponse:
         result = await self._api_request(url="onecall", params=self.params)
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution(self):
+    async def air_pollution(self) -> models.AirPollutionAPIResponse:
         result = await self._api_request(url="air_pollution", params=self.params)
         return result
 
+    # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution_forecast(self):
-        result = await self._api_request(url="", params=self.params)
+    async def air_pollution_forecast(self) -> models.AirPollutionAPIResponse:
+        result = await self._api_request(
+            url="air_pollution/forecast", params=self.params
+        )
+        return result
+
+    # NOT TESTED
+    @wrappers.model_return(model=models.AirPollutionAPIResponse)
+    async def air_pollution_history(
+        self, start: int, end: int
+    ) -> models.AirPollutionAPIResponse:
+        params = self.params()
+        params.update({"start": start, "end": end})
+        result = await self._api_request(url="air_pollution/history", params=params)
         return result
 
 
@@ -87,6 +100,7 @@ class OpenWeatherMap(OpenWeatherBase):
     """
     Documentation at: https://openweathermap.org/api/weathermaps
     """
+
     base_url = "https://tile.openweathermap.org/map"
     tile_x: int
     tile_y: int
@@ -104,18 +118,20 @@ class OpenWeatherMap(OpenWeatherBase):
 
     # NOT TESTED
     async def zoom_out(self):
-        self.zoom -= max(self.zoom - 1, 0)
+        self.zoom = max(self.zoom - 1, 0)
 
     # partially tested, needs fallback
     def __getattribute__(self, attr):
         # enables map endpoints to accessed without repetitive code
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
-            result = asyncio.run(self._basic_request(
-                layer=f"{attr}_new", x=self.tile_x, y=self.tile_x, z=self.zoom
-            ))
+            result = asyncio.run(
+                self._basic_request(
+                    layer=f"{attr}_new", x=self.tile_x, y=self.tile_x, z=self.zoom
+                )
+            )
             # possibly needs model
         else:
-            return super().__getattribute__(attr) 
+            return super().__getattribute__(attr)
         return result
 
 
