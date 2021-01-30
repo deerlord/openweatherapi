@@ -3,7 +3,6 @@ import logging
 from dataclasses import dataclass, field
 
 import aiohttp  # type: ignore
-from pydantic.error_wrappers import ValidationError as PydanticValidationError
 
 from openweathermap import exceptions, models, wrappers
 
@@ -66,19 +65,19 @@ class OpenWeatherData(OpenWeatherBase):
 
     # TESTED
     @wrappers.model_return(model=models.OneCallAPIResponse)
-    async def one_call(self) -> models.OneCallAPIResponse:
+    async def one_call(self) -> dict:
         result = await self._api_request(url="onecall", params=self.params)
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution(self) -> models.AirPollutionAPIResponse:
+    async def air_pollution(self) -> dict:
         result = await self._api_request(url="air_pollution", params=self.params)
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution_forecast(self) -> models.AirPollutionAPIResponse:
+    async def air_pollution_forecast(self) -> dict:
         result = await self._api_request(
             url="air_pollution/forecast", params=self.params
         )
@@ -86,9 +85,7 @@ class OpenWeatherData(OpenWeatherBase):
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution_history(
-        self, start: int, end: int
-    ) -> models.AirPollutionAPIResponse:
+    async def air_pollution_history(self, start: int, end: int) -> dict:
         params = self.params()
         params.update({"start": start, "end": end})
         result = await self._api_request(url="air_pollution/history", params=params)

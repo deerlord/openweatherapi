@@ -1,11 +1,12 @@
 import logging
 from functools import wraps
+from typing import Type
 
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 
 
-def model_return(model: BaseModel):
+def model_return(model: Type[BaseModel]):
     # take in base model
     # run results from method through mode
     # raise/log if exception
