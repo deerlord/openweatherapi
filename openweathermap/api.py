@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass, field
 
 import aiohttp  # type: ignore
+import asyncio
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
 
 from openweathermap import exceptions, models, wrappers
@@ -37,6 +38,7 @@ class OpenWeatherData(OpenWeatherBase):
     """
     Documentation at: https://openweathermap.org/api/one-call-api
     """
+
     api_key: str
     lat: float
     lon: float
@@ -74,7 +76,13 @@ class OpenWeatherData(OpenWeatherBase):
         result = await self._api_request(url="air_pollution", params=self.params)
         return result
 
+    @wrappers.model_return(model=models.AirPollutionAPIResponse)
+    async def air_pollution_forecast(self):
+        result = await self._api_request(url="", params=self.params)
+        return result
 
+
+@dataclass
 class OpenWeatherMap(OpenWeatherBase):
     """
     Documentation at: https://openweathermap.org/api/weathermaps
@@ -99,15 +107,19 @@ class OpenWeatherMap(OpenWeatherBase):
         self.zoom -= max(self.zoom - 1, 0)
 
     # NOT TESTED
-    async def clouds(self):
-        result = await self._basic_request(
-            layer="clouds_new", x=self.tile_x, y=self.tile_y, z=self.zoom
-        )
+    def __getattribute__(self, attr):
+        # enables map endpoints to accessed without repetitive code
+        if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
+            result = asyncio.run(self._basic_request(
+                layer=f"{attr}_new", x=self.tile_x, y=self.tile_x, z=self.zoom
+            ))
+        else:
+            return super().__getattribute__(attr) 
         return result
 
 
 async def icon(self, icon_id: str) -> bytes:
-    result = b''
+    result = b""
     url = f"http://openweathermap.org/img/wn/{icon_id}@2x.png"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
