@@ -1,13 +1,11 @@
-import asyncio
 import logging
 from dataclasses import dataclass, field
+from functools import partial
 from typing import Any, Dict
 
 import aiohttp  # type: ignore
 
 from openweathermap import exceptions, models, wrappers
-from functools import partial
-
 
 
 # TESTED
@@ -124,18 +122,12 @@ class OpenWeatherMap(OpenWeatherBase):
     def __getattribute__(self, attr):
         # enables map endpoints to accessed without repetitive code
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
-            #result = asyncio.run(
-            #    self._basic_request(
-            #        layer=f"{attr}_new", x=self.tile_x, y=self.tile_x, z=self.zoom
-            #    )
-            #)
-            # possibly needs model
             return partial(
                 self._basic_request,
                 layer=f"{attr}_new",
                 x=self.tile_x,
                 y=self.tile_y,
-                z=self.zoom
+                z=self.zoom,
             )
         else:
             return super().__getattribute__(attr)
@@ -156,19 +148,15 @@ class OpenWeatherGeocoding(OpenWeatherBase):
             "q": f"{city},{state},{country}",
         }  # type: Dict[str, Any]
         if limit:
-            params.update({'limit': limit})
+            params.update({"limit": limit})
         result = await self._api_request(url="/direct", params=params)
         return result
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
     async def reverse(self, lat: float, lon: float, limit: int = None):
-        params = {
-            'lat': lat,
-            'lon': lon,
-            'appid': self.api_key
-        }  # type: Dict[str, Any]
+        params = {"lat": lat, "lon": lon, "appid": self.api_key}  # type: Dict[str, Any]
         if limit:
-            params.update({'limit': limit})
+            params.update({"limit": limit})
         result = await self._api_request(url="/reverse", params=params)
         return result
 
