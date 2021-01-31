@@ -1,10 +1,19 @@
 import asyncio
+import pytest
+
 from unittest import TestCase
 
 from aioresponses import aioresponses as responses  # type: ignore
 
 from openweathermap import api, exceptions
 from tests.fixtures import openweatherapi as fixtures
+
+
+@pytest.fixture
+def event_loop():
+    loop = MyCustomLoop()
+    yield loop
+    loop.close()
 
 
 class TestBaseAPI(TestCase):
@@ -14,7 +23,7 @@ class TestBaseAPI(TestCase):
     def test_api_request(self):
         with responses() as resps:
             resps.get("/", status=200, payload={})
-            asyncio.run(self.client._api_request(url="", params={}))
+            asyncio.run(self.client._json_request(url="", params={}))
 
     def test_api_request_error(self):
         with responses() as resps:
@@ -23,7 +32,7 @@ class TestBaseAPI(TestCase):
                 self.assertRaises(
                     exceptions.BadRequest,
                     asyncio.run,
-                    self.client._api_request(url="", params={}),
+                    self.client._json_request(url="", params={}),
                 )
                 self.assertEqual(cm.output, ["ERROR:root:/ returns 500"])
 
@@ -63,12 +72,11 @@ class TestOpenWeatherMap(TestCase):
                 resps.get(
                     f"https://tile.openweathermap.org/map/{layer}_new/0/0/0.png?appid=",
                     status=200,
-                    payload={},
+                    payload="",
                 )
-                response = getattr(self.client, layer)
-                result = asyncio.run(response())
-                results.append(result)
+                response = asyncio.run(getattr(self.client, layer))
+            results.append('')
         self.assertEqual(
             results,
-            [{}, {}, {}, {}, {}]
+            ['', '', '', '', '']
         )

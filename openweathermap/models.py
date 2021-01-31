@@ -176,3 +176,11 @@ class GeocodingAPIResponse(BaseModel):
     lon: float
     country: str
     local_names: dict
+
+
+class UviAPIResponse(BaseModel):
+    lat: float
+    lon: float
+    date_iso: str
+    date: int
+    value: float
