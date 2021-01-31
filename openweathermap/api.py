@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from dataclasses import dataclass, field
 from functools import partial
@@ -122,16 +123,10 @@ class OpenWeatherMap(OpenWeatherBase):
     def __getattribute__(self, attr):
         # enables map endpoints to accessed without repetitive code
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
-            return partial(
-                self._basic_request,
-                layer=f"{attr}_new",
-                x=self.tile_x,
-                y=self.tile_y,
-                z=self.zoom,
+            return self._basic_request(
+                layer=f"{attr}_new", x=self.tile_x, y=self.tile_y, z=self.zoom
             )
-        else:
-            return super().__getattribute__(attr)
-        return result
+        return super().__getattribute__(attr)
 
 
 @dataclass
