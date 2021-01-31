@@ -20,8 +20,9 @@ class OpenWeatherBase:
 
     async def _json_request(self, url: str, params: Dict[str, Any] = {}) -> dict:
         result = {}
+        url = self._url_formatter(url)
         async with aiohttp.ClientSession() as session:
-            async with (session.get(self._url_formatter(url), params=params)) as resp:
+            async with (session.get(url=url, params=params)) as resp:
                 if resp.status == 200:
                     result = await resp.json()
                 else:
@@ -34,7 +35,6 @@ class OpenWeatherBase:
     async def _binary_request(self, url: str, params: Dict[str, Any] = {}) -> bytes:
         result = b""
         url = self._url_formatter(url=url)
-        print('URL', url)
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params) as resp:
                 if resp.status == 200:
@@ -42,7 +42,7 @@ class OpenWeatherBase:
                 else:
                     message = f"{resp.url} returned {resp.status}"
                     logging.error(message)
-                    raise exceptions.IconNotFound()
+                    raise exceptions.BadRequest(resp.status)
         return result
 
 
@@ -109,7 +109,7 @@ class OpenWeatherData(OpenWeatherBase):
     # NOT TESTED
     @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi(self, count: int = 0):
-        """ "
+        """
         http://api.openweathermap.org/data/2.5/uvi?lat={lat}&lon={lon}&appid={API key}
         """
         result = await self._json_request(url="/uvi", params=self.params)
@@ -180,15 +180,10 @@ class OpenWeatherGeocoding(OpenWeatherBase):
 
 async def icon(self, icon_id: str) -> bytes:
     result = b""
-    url = f"http://openweathermap.org/img/wn/{icon_id}@2x.png"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status == 200:
-                result = await resp.read()
-            else:
-                message = f"{resp.url} returned {resp.status}"
-                logging.error(message)
-                raise exceptions.IconNotFound()
+    client = OpenWeatherBase(api_key="")
+    client.base_url = "http://openweathermap.org/img/wn"
+    url = f"/{icon_id}@2x.png"
+    result = await client._binary_request(url=url)
     return result
 
 
