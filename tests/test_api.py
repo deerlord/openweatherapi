@@ -66,5 +66,9 @@ class TestOpenWeatherMap(TestCase):
                     payload={},
                 )
                 response = getattr(self.client, layer)
-                results.append(response)
-        print(results)
+                result = asyncio.run(response())
+                results.append(result)
+        self.assertEqual(
+            results,
+            [{}, {}, {}, {}, {}]
+        )
