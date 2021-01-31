@@ -1,7 +1,5 @@
-import asyncio
 import logging
 from dataclasses import dataclass, field
-from functools import partial
 from typing import Any, Dict
 
 import aiohttp  # type: ignore
