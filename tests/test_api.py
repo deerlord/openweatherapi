@@ -18,7 +18,7 @@ def event_loop():
 
 class TestBaseAPI(TestCase):
     def setUp(self):
-        self.client = api.OpenWeatherBase(api_key="")
+        self.client = api.OpenWeatherBase(appid="")
 
     def test_api_request(self):
         with responses() as resps:
@@ -47,7 +47,7 @@ class TestBaseAPI(TestCase):
 
 class TestOpenWeatherData(TestCase):
     def setUp(self):
-        self.client = api.OpenWeatherData(api_key="", lat=0.0, lon=0.0)
+        self.client = api.OpenWeatherData(appid="")
 
     def test_one_call(self):
         with responses() as resps:
@@ -57,13 +57,13 @@ class TestOpenWeatherData(TestCase):
                 payload=fixtures.ONE_CALL_API_RESPONSE_INPUT,
                 status=200,
             )
-            result = asyncio.run(self.client.one_call())
+            result = asyncio.run(self.client.one_call(lat=0.0,lon=0.0,units='imperial'))
         self.assertDictEqual(result.dict(), fixtures.ONE_CALL_API_AS_DICT)
 
 
 class TestOpenWeatherMap(TestCase):
     def setUp(self):
-        self.client = api.OpenWeatherMap(api_key="", tile_x=0, tile_y=0, zoom=0)
+        self.client = api.OpenWeatherMap(appid="")
 
     def test_attributes(self):
         results = []
@@ -72,11 +72,12 @@ class TestOpenWeatherMap(TestCase):
                 resps.get(
                     f"https://tile.openweathermap.org/map/{layer}_new/0/0/0.png?appid=",
                     status=200,
-                    payload="",
                 )
-                response = asyncio.run(getattr(self.client, layer))
-            results.append('')
+                #response = asyncio.run(getattr(self.client, layer))
+                func = getattr(self.client, layer)
+                result = asyncio.run(func(0,0,0))
+            results.append(result)
         self.assertEqual(
             results,
-            ['', '', '', '', '']
+            [b'', b'', b'', b'', b'']
         )

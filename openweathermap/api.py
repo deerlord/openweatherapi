@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict
 
 import aiohttp  # type: ignore
@@ -10,7 +10,7 @@ from openweathermap import exceptions, models, wrappers
 # TESTED
 @dataclass
 class OpenWeatherBase:
-    api_key: str
+    appid: str
     base_url = ""
 
     def _url_formatter(self, url: str) -> str:
@@ -53,66 +53,50 @@ class OpenWeatherData(OpenWeatherBase):
     Documentation at: https://openweathermap.org/api/one-call-api
     """
 
-    api_key: str
-    lat: float
-    lon: float
-    __units: str = field(init=False, default="imperial")
     base_url = "https://api.openweathermap.org/data/2.5"
 
-    # NOT TESTED
-    @property
-    def params(self):
-        return {
-            "lat": self.lat,
-            "lon": self.lon,
-            "appid": self.api_key,
-            "units": self.units,
-        }
-
-    @property
-    def units(self) -> str:
-        return self.__units
-
-    @units.setter
-    def units(self, value):
-        if value.lower() in ["standard", "metric", "imperial"]:
-            self.__units = value.lower()
+    async def _basic_request(self, url: str, lat: float, lon: float, **kwargs):
+        params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
+        params.update(**kwargs)
+        result = await self._json_request(url=url, params=params)
+        return result
 
     # TESTED
     @wrappers.model_return(model=models.OneCallAPIResponse)
-    async def one_call(self) -> dict:
-        result = await self._json_request(url="onecall", params=self.params)
+    async def one_call(self, lat: float, lon: float, **kwargs) -> dict:
+        result = await self._basic_request(url="onecall", lat=lat, lon=lon, **kwargs)
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution(self) -> dict:
-        result = await self._json_request(url="air_pollution", params=self.params)
-        return result
-
-    # NOT TESTED
-    @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution_forecast(self) -> dict:
-        result = await self._json_request(
-            url="air_pollution/forecast", params=self.params
+    async def air_pollution(self, lat: float, lon: float, **kwargs) -> dict:
+        result = await self._basic_request(
+            url="air_pollution", lat=lat, lon=lon, **kwargs
         )
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution_history(self, start: int, end: int) -> dict:
-        params = self.params()
-        params.update({"start": start, "end": end})
-        result = await self._json_request(url="air_pollution/history", params=params)
+    async def air_pollution_forecast(self, lat: float, lon: float, **kwargs) -> dict:
+        result = await self._basic_request(
+            url="air_pollution/forecast", lat=lat, lon=lon, **kwargs
+        )
+        return result
+
+    # NOT TESTED
+    @wrappers.model_return(model=models.AirPollutionAPIResponse)
+    async def air_pollution_history(
+        self, lon: float, lat: float, start: int, end: int
+    ) -> dict:
+        result = await self._basic_request(
+            url="air_pollution/history", lat=lat, lon=lon, start=start, end=end
+        )
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.UviAPIResponse)
-    async def uvi(self, count: int = 0):
-        """
-        http://api.openweathermap.org/data/2.5/uvi?lat={lat}&lon={lon}&appid={API key}
-        """
-        result = await self._json_request(url="/uvi", params=self.params)
+    async def uvi(self, lat: float, lon: float, count: int = 0):
+        result = await self._basic_request(url="/uvi", lat=lat, lon=lon, count=count)
         return result
 
 
@@ -123,32 +107,24 @@ class OpenWeatherMap(OpenWeatherBase):
     """
 
     base_url = "https://tile.openweathermap.org/map"
-    tile_x: int
-    tile_y: int
-    zoom: int
 
     # NOT TESTED
     async def _basic_request(self, layer: str, x: int, y: int, z: int):
         url = f"/{layer}/{z}/{x}/{y}.png"
-        result = await self._binary_request(url=url, params={"appid": self.api_key})
+        result = await self._binary_request(url=url, params={"appid": self.appid})
         return result
-
-    # NOT TESTED
-    async def zoom_in(self):
-        self.zoom = min(self.zoom + 1, OPENWEATHERMAP_MAX_ZOOM)
-
-    # NOT TESTED
-    async def zoom_out(self):
-        self.zoom = max(self.zoom - 1, 0)
 
     # partially tested, needs fallback
     def __getattribute__(self, attr):
         # enables map endpoints to accessed without repetitive code
+        # for instance: map = self.clouds
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
             # returns a coro
-            return self._basic_request(
-                layer=f"{attr}_new", x=self.tile_x, y=self.tile_y, z=self.zoom
-            )
+            async def f(x: int, y: int, z: int):
+                result = await self._basic_request(layer=f"{attr}_new", x=x, y=y, z=z)
+                return result
+
+            return f
         return super().__getattribute__(attr)
 
 
@@ -161,7 +137,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
         self, city: str, state: str, country: str, limit: int = None
     ) -> dict:
         params = {
-            "appid": self.api_key,
+            "appid": self.appid,
             "q": f"{city},{state},{country}",
         }  # type: Dict[str, Any]
         if limit:
@@ -171,7 +147,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
     async def reverse(self, lat: float, lon: float, limit: int = None):
-        params = {"lat": lat, "lon": lon, "appid": self.api_key}  # type: Dict[str, Any]
+        params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
         if limit:
             params.update({"limit": limit})
         result = await self._json_request(url="/reverse", params=params)
@@ -180,11 +156,8 @@ class OpenWeatherGeocoding(OpenWeatherBase):
 
 async def icon(self, icon_id: str) -> bytes:
     result = b""
-    client = OpenWeatherBase(api_key="")
+    client = OpenWeatherBase(appid="")
     client.base_url = "http://openweathermap.org/img/wn"
     url = f"/{icon_id}@2x.png"
     result = await client._binary_request(url=url)
     return result
-
-
-OPENWEATHERMAP_MAX_ZOOM = 50  # maybe not accurate
