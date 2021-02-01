@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import aiohttp  # type: ignore
 
@@ -63,23 +63,23 @@ class OpenWeatherData(OpenWeatherBase):
 
     # TESTED
     @wrappers.model_return(model=models.OneCallAPIResponse)
-    async def one_call(self, lat: float, lon: float, **kwargs) -> dict:
-        result = await self._basic_request(url="onecall", lat=lat, lon=lon, **kwargs)
-        return result
-
-    # NOT TESTED
-    @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution(self, lat: float, lon: float, **kwargs) -> dict:
+    async def one_call(self, lat: float, lon: float, units: str) -> Dict[str, Any]:
         result = await self._basic_request(
-            url="air_pollution", lat=lat, lon=lon, **kwargs
+            url="/onecall", lat=lat, lon=lon, units=units
         )
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution_forecast(self, lat: float, lon: float, **kwargs) -> dict:
+    async def air_pollution(self, lat: float, lon: float) -> dict:
+        result = await self._basic_request(url="/air_pollution", lat=lat, lon=lon)
+        return result
+
+    # NOT TESTED
+    @wrappers.model_return(model=models.AirPollutionAPIResponse)
+    async def air_pollution_forecast(self, lat: float, lon: float) -> Dict[str, Any]:
         result = await self._basic_request(
-            url="air_pollution/forecast", lat=lat, lon=lon, **kwargs
+            url="/air_pollution/forecast", lat=lat, lon=lon
         )
         return result
 
@@ -87,16 +87,34 @@ class OpenWeatherData(OpenWeatherBase):
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution_history(
         self, lon: float, lat: float, start: int, end: int
-    ) -> dict:
+    ) -> Dict[str, Any]:
         result = await self._basic_request(
-            url="air_pollution/history", lat=lat, lon=lon, start=start, end=end
+            url="/air_pollution/history", lat=lat, lon=lon, start=start, end=end
         )
         return result
 
     # NOT TESTED
     @wrappers.model_return(model=models.UviAPIResponse)
-    async def uvi(self, lat: float, lon: float, count: int = 0):
-        result = await self._basic_request(url="/uvi", lat=lat, lon=lon, count=count)
+    async def uvi(self, lat: float, lon: float) -> Dict[str, Any]:
+        result = await self._basic_request(url="/uvi", lat=lat, lon=lon)
+        return result
+
+    @wrappers.model_return(model=models.UviAPIResponse)
+    async def uvi_forecast(
+        self, lat: float, lon: float, cnt: int
+    ) -> List[Dict[str, Any]]:
+        result = await self._basic_request(
+            url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt
+        )
+        return result
+
+    @wrappers.model_return(model=models.UviAPIResponse)
+    async def uvi_history(
+        self, lat: float, lon: float, cnt: int, start: int, end: int
+    ) -> Dict[str, Any]:
+        result = await self._basic_request(
+            url="/uvi/history", lat=lat, lon=lon, cnt=cnt, start=start, end=end
+        )
         return result
 
 
@@ -117,7 +135,7 @@ class OpenWeatherMap(OpenWeatherBase):
     # partially tested, needs fallback
     def __getattribute__(self, attr):
         # enables map endpoints to accessed without repetitive code
-        # for instance: map = self.clouds
+        # for instance: map = self.clouds(x,y,z)
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
             # returns a coro
             async def f(x: int, y: int, z: int):
@@ -135,7 +153,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
     @wrappers.model_return(model=models.GeocodingAPIResponse)
     async def geocode(
         self, city: str, state: str, country: str, limit: int = None
-    ) -> dict:
+    ) -> Dict[str, Any]:
         params = {
             "appid": self.appid,
             "q": f"{city},{state},{country}",
@@ -146,7 +164,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
         return result
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
-    async def reverse(self, lat: float, lon: float, limit: int = None):
+    async def reverse(self, lat: float, lon: float, limit: int = None) -> Dict[str, Any]:
         params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
         if limit:
             params.update({"limit": limit})
