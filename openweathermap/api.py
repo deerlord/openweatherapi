@@ -153,7 +153,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
     @wrappers.model_return(model=models.GeocodingAPIResponse)
     async def geocode(
         self, city: str, state: str, country: str, limit: int = None
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         params = {
             "appid": self.appid,
             "q": f"{city},{state},{country}",
@@ -166,7 +166,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
     @wrappers.model_return(model=models.GeocodingAPIResponse)
     async def reverse(
         self, lat: float, lon: float, limit: int = None
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
         if limit:
             params.update({"limit": limit})
@@ -175,7 +175,6 @@ class OpenWeatherGeocoding(OpenWeatherBase):
 
 
 async def icon(self, icon_id: str) -> bytes:
-    result = b""
     client = OpenWeatherBase(appid="")
     client.base_url = "http://openweathermap.org/img/wn"
     url = f"/{icon_id}@2x.png"
