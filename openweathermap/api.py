@@ -1,3 +1,4 @@
+import functools
 import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List
@@ -132,17 +133,12 @@ class OpenWeatherMap(OpenWeatherBase):
         result = await self._binary_request(url=url, params={"appid": self.appid})
         return result
 
-    # partially tested, needs fallback
     def __getattribute__(self, attr):
         # enables map endpoints to accessed without repetitive code
         # for instance: map = self.clouds(x,y,z)
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
             # returns a coro
-            async def f(x: int, y: int, z: int):
-                result = await self._basic_request(layer=f"{attr}_new", x=x, y=y, z=z)
-                return result
-
-            return f
+            return functools.partial(self._basic_request, f"{attr}_new")
         return super().__getattribute__(attr)
 
 
