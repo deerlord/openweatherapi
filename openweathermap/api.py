@@ -18,7 +18,7 @@ class OpenWeatherBase:
         result = f"{self.base_url}/{url}"
         return result
 
-    async def _json_request(self, url: str, params: Dict[str, Any] = {}) -> dict:
+    async def _json_request(self, url: str, params: Dict[str, Any] = {}):
         result = {}
         url = self._url_formatter(url)
         async with aiohttp.ClientSession() as session:
