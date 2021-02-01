@@ -164,7 +164,9 @@ class OpenWeatherGeocoding(OpenWeatherBase):
         return result
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
-    async def reverse(self, lat: float, lon: float, limit: int = None) -> Dict[str, Any]:
+    async def reverse(
+        self, lat: float, lon: float, limit: int = None
+    ) -> Dict[str, Any]:
         params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
         if limit:
             params.update({"limit": limit})
