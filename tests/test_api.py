@@ -20,21 +20,47 @@ class TestBaseAPI(TestCase):
     def setUp(self):
         self.client = api.OpenWeatherBase(appid="")
 
-    def test_api_request(self):
+    def test_json_request(self):
         with responses() as resps:
-            resps.get("/", status=200, payload={})
-            asyncio.run(self.client._json_request(url="", params={}))
+            resps.get("/", status=200, payload={'KEY': 'VALUE'})
+            result = asyncio.run(self.client._json_request(url=""))
+        self.assertEqual(
+            result,
+            {'KEY': 'VALUE'},
+            'Did not return  expected JSON.'
+        )
 
-    def test_api_request_error(self):
+    def test_json_request_error(self):
         with responses() as resps:
             resps.get("/", status=500, payload={})
             with self.assertLogs("", level="ERROR") as cm:
                 self.assertRaises(
                     exceptions.BadRequest,
                     asyncio.run,
-                    self.client._json_request(url="", params={}),
+                    self.client._json_request(url=""),
                 )
-                self.assertEqual(cm.output, ["ERROR:root:/ returns 500"])
+        self.assertEqual(cm.output, ["ERROR:root:/ returned 500"])
+    
+    def test_binary_request(self):
+        with responses() as resps:
+            resps.get("/", status=200, payload='VALUE')
+            result = asyncio.run(self.client._binary_request(url="", params={}))
+        self.assertEqual(
+            result,
+            b'"VALUE"',
+            'Did not return expected byte string.'
+        )
+    
+    def test_binary_request_error(self):
+        with responses() as resps:
+             resps.get('/', status=500, payload='')
+             with self.assertLogs("", level="ERROR") as cm:
+                 self.assertRaises(
+                    exceptions.BadRequest,
+                    asyncio.run,
+                    self.client._binary_request(url="")
+                )
+        self.assertEqual(cm.output, ["ERROR:root:/ returned 500"])
 
     def test_url_formatter(self):
         result = self.client._url_formatter(url="/test/url")
@@ -81,3 +107,19 @@ class TestOpenWeatherMap(TestCase):
             results,
             [b'', b'', b'', b'', b'']
         )
+
+
+class TestOpenWeatherGeocoding(TestCase):
+    def setUp(self):
+        self.client = api.OpenWeatherGeocoding(appid="")
+
+    def test_geocode(self):
+        with responses() as resps:
+            resps.get(
+                "https://api.openweathermap.org/geo/1.0/direct?limit=2&q=London%252CTX%252CGB",
+                status=200,
+                payload=fixtures.GEOCODE_API_RESPONSE
+            )
+            result = asyncio.run(self.client.geocode(city='London', state='TX', country='GB', limit=2))
+        print('??', result)
+        # test result

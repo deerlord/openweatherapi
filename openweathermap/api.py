@@ -27,12 +27,11 @@ class OpenWeatherBase:
                 if resp.status == 200:
                     result = await resp.json()
                 else:
-                    message = f"{resp.url} returns {resp.status}"
+                    message = f"{resp.url} returned {resp.status}"
                     logging.error(message)
                     raise exceptions.BadRequest(resp.status)
         return result
 
-    # needs test
     async def _binary_request(self, url: str, params: Dict[str, Any] = {}) -> bytes:
         result = b""
         url = self._url_formatter(url=url)
