@@ -1,7 +1,6 @@
 import asyncio
 from unittest import TestCase
 
-from openweathermap import wrappers
 from openweathermap.wrappers import model_return
 from tests.fixtures.wrappers import EXAMPLE_MODEL_DICT, ExampleModel
 

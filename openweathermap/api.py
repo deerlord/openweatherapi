@@ -19,7 +19,7 @@ class OpenWeatherBase:
         result = f"{self.base_url}/{url}"
         return result
 
-    async def _json_request(self, url: str, params: Dict[str, Any] = {}):
+    async def _json_request(self, url: str, params: Dict[str, Any] = {}) -> Any:
         result = {}
         url = self._url_formatter(url)
         async with aiohttp.ClientSession() as session:
@@ -55,7 +55,7 @@ class OpenWeatherData(OpenWeatherBase):
 
     base_url = "https://api.openweathermap.org/data/2.5"
 
-    async def _basic_request(self, url: str, lat: float, lon: float, **kwargs):
+    async def _basic_request(self, url: str, lat: float, lon: float, **kwargs) -> Any:
         params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
         params.update(**kwargs)
         result = await self._json_request(url=url, params=params)
@@ -71,7 +71,7 @@ class OpenWeatherData(OpenWeatherBase):
 
     # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution(self, lat: float, lon: float) -> dict:
+    async def air_pollution(self, lat: float, lon: float) -> Dict[str, Any]:
         result = await self._basic_request(url="/air_pollution", lat=lat, lon=lon)
         return result
 
@@ -111,7 +111,7 @@ class OpenWeatherData(OpenWeatherBase):
     @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi_history(
         self, lat: float, lon: float, cnt: int, start: int, end: int
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         result = await self._basic_request(
             url="/uvi/history", lat=lat, lon=lon, cnt=cnt, start=start, end=end
         )
@@ -127,12 +127,12 @@ class OpenWeatherMap(OpenWeatherBase):
     base_url = "https://tile.openweathermap.org/map"
 
     # NOT TESTED
-    async def _basic_request(self, layer: str, x: int, y: int, z: int):
+    async def _basic_request(self, layer: str, x: int, y: int, z: int) -> bytes:
         url = f"/{layer}/{z}/{x}/{y}.png"
         result = await self._binary_request(url=url, params={"appid": self.appid})
         return result
 
-    def __getattribute__(self, attr):
+    def __getattribute__(self, attr) -> Any:
         # enables map endpoints to accessed without repetitive code
         # for instance: map = self.clouds(x,y,z)
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:

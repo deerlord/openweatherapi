@@ -1,6 +1,4 @@
 import asyncio
-import pytest
-
 from unittest import TestCase
 
 from aioresponses import aioresponses as responses  # type: ignore
@@ -9,26 +7,15 @@ from openweathermap import api, exceptions
 from tests.fixtures import openweatherapi as fixtures
 
 
-@pytest.fixture
-def event_loop():
-    loop = MyCustomLoop()
-    yield loop
-    loop.close()
-
-
 class TestBaseAPI(TestCase):
     def setUp(self):
         self.client = api.OpenWeatherBase(appid="")
 
     def test_json_request(self):
         with responses() as resps:
-            resps.get("/", status=200, payload={'KEY': 'VALUE'})
+            resps.get("/", status=200, payload={"KEY": "VALUE"})
             result = asyncio.run(self.client._json_request(url=""))
-        self.assertEqual(
-            result,
-            {'KEY': 'VALUE'},
-            'Did not return  expected JSON.'
-        )
+        self.assertEqual(result, {"KEY": "VALUE"}, "Did not return  expected JSON.")
 
     def test_json_request_error(self):
         with responses() as resps:
@@ -40,25 +27,21 @@ class TestBaseAPI(TestCase):
                     self.client._json_request(url=""),
                 )
         self.assertEqual(cm.output, ["ERROR:root:/ returned 500"])
-    
+
     def test_binary_request(self):
         with responses() as resps:
-            resps.get("/", status=200, payload='VALUE')
+            resps.get("/", status=200, payload="VALUE")
             result = asyncio.run(self.client._binary_request(url="", params={}))
-        self.assertEqual(
-            result,
-            b'"VALUE"',
-            'Did not return expected byte string.'
-        )
-    
+        self.assertEqual(result, b'"VALUE"', "Did not return expected byte string.")
+
     def test_binary_request_error(self):
         with responses() as resps:
-             resps.get('/', status=500, payload='')
-             with self.assertLogs("", level="ERROR") as cm:
-                 self.assertRaises(
+            resps.get("/", status=500, payload="")
+            with self.assertLogs("", level="ERROR") as cm:
+                self.assertRaises(
                     exceptions.BadRequest,
                     asyncio.run,
-                    self.client._binary_request(url="")
+                    self.client._binary_request(url=""),
                 )
         self.assertEqual(cm.output, ["ERROR:root:/ returned 500"])
 
@@ -83,7 +66,9 @@ class TestOpenWeatherData(TestCase):
                 payload=fixtures.ONE_CALL_API_RESPONSE_INPUT,
                 status=200,
             )
-            result = asyncio.run(self.client.one_call(lat=0.0,lon=0.0,units='imperial'))
+            result = asyncio.run(
+                self.client.one_call(lat=0.0, lon=0.0, units="imperial")
+            )
         self.assertDictEqual(result.dict(), fixtures.ONE_CALL_API_AS_DICT)
 
 
@@ -99,14 +84,11 @@ class TestOpenWeatherMap(TestCase):
                     f"https://tile.openweathermap.org/map/{layer}_new/0/0/0.png?appid=",
                     status=200,
                 )
-                #response = asyncio.run(getattr(self.client, layer))
+                # response = asyncio.run(getattr(self.client, layer))
                 func = getattr(self.client, layer)
-                result = asyncio.run(func(0,0,0))
+                result = asyncio.run(func(0, 0, 0))
             results.append(result)
-        self.assertEqual(
-            results,
-            [b'', b'', b'', b'', b'']
-        )
+        self.assertEqual(results, [b"", b"", b"", b"", b""])
 
 
 class TestOpenWeatherGeocoding(TestCase):
@@ -116,10 +98,13 @@ class TestOpenWeatherGeocoding(TestCase):
     def test_geocode(self):
         with responses() as resps:
             resps.get(
-                "https://api.openweathermap.org/geo/1.0/direct?limit=2&q=London%252CTX%252CGB",
+                "https://api.openweathermap.org/geo/1.0/direct?"
+                "limit=2&q=London%252CTX%252CGB",
                 status=200,
-                payload=fixtures.GEOCODE_API_RESPONSE
+                payload=fixtures.GEOCODE_API_RESPONSE,
             )
-            result = asyncio.run(self.client.geocode(city='London', state='TX', country='GB', limit=2))
-        print('??', result)
+            result = asyncio.run(
+                self.client.geocode(city="London", state="TX", country="GB", limit=2)
+            )
+        print("??", result)
         # test result
