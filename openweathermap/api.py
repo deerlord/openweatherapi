@@ -12,11 +12,13 @@ from openweathermap import exceptions, models, wrappers
 class OpenWeatherBase:
     appid: str
     base_url = ""
+    cache_interval: int = 0
 
     def _url_formatter(self, url: str) -> str:
         url = url[1:] if url.startswith("/") else url
         return f"{self.base_url}/{url}"
-
+    
+    @wrappers.time_cache
     async def _json_request(self, url: str, params: Dict[str, Any] = {}) -> Any:
         result = {}
         url = self._url_formatter(url)
@@ -30,6 +32,7 @@ class OpenWeatherBase:
                     raise exceptions.BadRequest(resp.status)
         return result
 
+    @wrappers.time_cache
     async def _binary_request(self, url: str, params: Dict[str, Any] = {}) -> bytes:
         result = b""
         url = self._url_formatter(url=url)

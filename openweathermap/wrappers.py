@@ -1,6 +1,7 @@
 import logging
+from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Type, Callable
 
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
@@ -9,7 +10,7 @@ from openweathermap import exceptions
 
 
 def model_return(model: Type[BaseModel]):
-    def wrapper(func):
+    def wrapper(func: Callable):
         @wraps(func)
         async def caller(*args, **kwargs):
             result = await func(*args, **kwargs)
@@ -18,6 +19,24 @@ def model_return(model: Type[BaseModel]):
         return caller
 
     return wrapper
+
+
+def time_cache(func: Callable):
+    cache = {}
+
+    @wraps(func)
+    async def caller(self, *args, **kwargs):
+        interval = timedelta(seconds=self.cache_interval)
+        arg_sig = f"{args},{kwargs}"
+        if (
+            arg_sig not in cache
+            or (cache[arg_sig]["updated"] + interval) < datetime.utcnow()
+        ):
+            data = await func(self, *args, **kwargs)
+            cache[arg_sig] = {"updated": datetime.utcnow(), "data": data}
+        return cache[arg_sig]["data"]
+
+    return caller
 
 
 def convert_list(model: Type[BaseModel], data: List[Dict[str, Any]]) -> List[BaseModel]:
