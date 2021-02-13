@@ -8,7 +8,6 @@ import aiohttp  # type: ignore
 from openweathermap import exceptions, models, wrappers
 
 
-# TESTED
 @dataclass
 class OpenWeatherBase:
     appid: str
@@ -46,7 +45,6 @@ class OpenWeatherBase:
         return result
 
 
-# NEED TESTS
 @dataclass
 class OpenWeatherData(OpenWeatherBase):
     """
@@ -121,7 +119,6 @@ class OpenWeatherMap(OpenWeatherBase):
 
     base_url = "https://tile.openweathermap.org/map"
 
-    # NOT TESTED
     async def _basic_request(self, layer: str, x: int, y: int, z: int) -> bytes:
         url = f"/{layer}/{z}/{x}/{y}.png"
         result = await self._binary_request(url=url, params={"appid": self.appid})
