@@ -15,8 +15,7 @@ class OpenWeatherBase:
 
     def _url_formatter(self, url: str) -> str:
         url = url[1:] if url.startswith("/") else url
-        result = f"{self.base_url}/{url}"
-        return result
+        return f"{self.base_url}/{url}"
 
     async def _json_request(self, url: str, params: Dict[str, Any] = {}) -> Any:
         result = {}
@@ -56,59 +55,51 @@ class OpenWeatherData(OpenWeatherBase):
     async def _basic_request(self, url: str, lat: float, lon: float, **kwargs) -> Any:
         params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
         params.update(**kwargs)
-        result = await self._json_request(url=url, params=params)
-        return result
+        return await self._json_request(url=url, params=params)
 
     @wrappers.model_return(model=models.OneCallAPIResponse)
     async def one_call(self, lat: float, lon: float, units: str) -> Dict[str, Any]:
-        result = await self._basic_request(
+        return await self._basic_request(
             url="/onecall", lat=lat, lon=lon, units=units
         )
-        return result
 
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution(self, lat: float, lon: float) -> Dict[str, Any]:
-        result = await self._basic_request(url="/air_pollution", lat=lat, lon=lon)
-        return result
+        return await self._basic_request(url="/air_pollution", lat=lat, lon=lon)
 
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution_forecast(self, lat: float, lon: float) -> Dict[str, Any]:
-        result = await self._basic_request(
+        return await self._basic_request(
             url="/air_pollution/forecast", lat=lat, lon=lon
         )
-        return result
 
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution_history(
         self, lon: float, lat: float, start: int, end: int
     ) -> Dict[str, Any]:
-        result = await self._basic_request(
+        return await self._basic_request(
             url="/air_pollution/history", lat=lat, lon=lon, start=start, end=end
         )
-        return result
 
     @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi(self, lat: float, lon: float) -> Dict[str, Any]:
-        result = await self._basic_request(url="/uvi", lat=lat, lon=lon)
-        return result
+        return await self._basic_request(url="/uvi", lat=lat, lon=lon)
 
     @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi_forecast(
         self, lat: float, lon: float, cnt: int
     ) -> List[Dict[str, Any]]:
-        result = await self._basic_request(
+        return await self._basic_request(
             url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt
         )
-        return result
 
     @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi_history(
         self, lat: float, lon: float, cnt: int, start: int, end: int
     ) -> List[Dict[str, Any]]:
-        result = await self._basic_request(
+        return await self._basic_request(
             url="/uvi/history", lat=lat, lon=lon, cnt=cnt, start=start, end=end
         )
-        return result
 
 
 @dataclass
@@ -121,8 +112,7 @@ class OpenWeatherMap(OpenWeatherBase):
 
     async def _basic_request(self, layer: str, x: int, y: int, z: int) -> bytes:
         url = f"/{layer}/{z}/{x}/{y}.png"
-        result = await self._binary_request(url=url, params={"appid": self.appid})
-        return result
+        return await self._binary_request(url=url, params={"appid": self.appid})
 
     def __getattribute__(self, attr) -> Any:
         # enables map endpoints to accessed without repetitive code
@@ -147,8 +137,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
         }  # type: Dict[str, Any]
         if limit:
             params.update({"limit": limit})
-        result = await self._json_request(url="/direct", params=params)
-        return result
+        return await self._json_request(url="/direct", params=params)
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
     async def reverse(
@@ -157,13 +146,11 @@ class OpenWeatherGeocoding(OpenWeatherBase):
         params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
         if limit:
             params.update({"limit": limit})
-        result = await self._json_request(url="/reverse", params=params)
-        return result
+        return await self._json_request(url="/reverse", params=params)
 
 
 async def icon(icon_id: str) -> bytes:
     client = OpenWeatherBase(appid="")
     client.base_url = "http://openweathermap.org/img/wn"
     url = f"/{icon_id}@2x.png"
-    result = await client._binary_request(url=url)
-    return result
+    return await client._binary_request(url=url)
