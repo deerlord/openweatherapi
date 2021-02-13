@@ -17,7 +17,7 @@ class OpenWeatherBase:
     def _url_formatter(self, url: str) -> str:
         url = url[1:] if url.startswith("/") else url
         return f"{self.base_url}/{url}"
-    
+
     @wrappers.time_cache
     async def _json_request(self, url: str, params: Dict[str, Any] = {}) -> Any:
         result = {}

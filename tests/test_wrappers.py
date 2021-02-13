@@ -23,6 +23,10 @@ class TestWrappers(TestCase):
             result.dict(), EXAMPLE_MODEL_DICT, "Incorrect dictionary returned"
         )
 
+    def test_time_cache(self):
+        # not sure how to test
+        pass
+
     def test_convert_dict_validation_failure(self):
         @model_return(model=ExampleModel)
         async def func():
