@@ -282,7 +282,7 @@ FLATTEN_HOURLY = {
 
 
 AIR_POLLUTION = {
-    "coord": {"lat":50.0, "lon":50.0},
+    "coord": {"lat": 50.0, "lon": 50.0},
     "list": [
         {
             "dt": 1605916800,
@@ -355,7 +355,7 @@ GEOCODE_API_RESPONSE = [
 
 
 AIR_POLLUTION_API_RESPONSE_INPUT = {
-    "coord": {"lat": 0.0, "lon":0.0},
+    "coord": {"lat": 0.0, "lon": 0.0},
     "list": [
         {
             "dt": 1606147200,
@@ -375,7 +375,7 @@ AIR_POLLUTION_API_RESPONSE_INPUT = {
 }
 
 AIR_POLLUTION_FORECAST_API_RESPONSE = {
-    "coord": {"lat":50.0, "lon":50.0},
+    "coord": {"lat": 50.0, "lon": 50.0},
     "list": [
         {
             "dt": 1605916800,
@@ -438,7 +438,7 @@ AIR_POLLUTION_FORECAST_API_RESPONSE = {
 
 
 AIR_POLLUTION_HISTORY_API_RESPONSE = {
-    "coord": {"lat": 50.0, "lon":50.0},
+    "coord": {"lat": 50.0, "lon": 50.0},
     "list": [
         {
             "main": {"aqi": 2},

@@ -59,9 +59,7 @@ class OpenWeatherData(OpenWeatherBase):
 
     @wrappers.model_return(model=models.OneCallAPIResponse)
     async def one_call(self, lat: float, lon: float, units: str) -> Dict[str, Any]:
-        return await self._basic_request(
-            url="/onecall", lat=lat, lon=lon, units=units
-        )
+        return await self._basic_request(url="/onecall", lat=lat, lon=lon, units=units)
 
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution(self, lat: float, lon: float) -> Dict[str, Any]:
@@ -89,9 +87,7 @@ class OpenWeatherData(OpenWeatherBase):
     async def uvi_forecast(
         self, lat: float, lon: float, cnt: int
     ) -> List[Dict[str, Any]]:
-        return await self._basic_request(
-            url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt
-        )
+        return await self._basic_request(url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt)
 
     @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi_history(
