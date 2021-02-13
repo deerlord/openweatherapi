@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Dict, List, Type, Callable
+from typing import Any, Callable, Dict, List, Type
 
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError as PydanticValidationError
@@ -22,7 +22,7 @@ def model_return(model: Type[BaseModel]):
 
 
 def time_cache(func: Callable):
-    cache = {}
+    cache = {}  # type: Dict[str, Any]
 
     @wraps(func)
     async def caller(self, *args, **kwargs):
