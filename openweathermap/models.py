@@ -167,7 +167,7 @@ class AirPollution(BaseModel):
 
 class AirPollutionAPIResponse(BaseModel):
     coord: list
-    list: AirPollution
+    list: List[AirPollution]
 
 
 class GeocodingAPIResponse(BaseModel):
@@ -176,6 +176,7 @@ class GeocodingAPIResponse(BaseModel):
     lon: float
     country: str
     local_names: dict
+    state: str = ""
 
 
 class UviAPIResponse(BaseModel):

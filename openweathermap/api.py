@@ -61,7 +61,6 @@ class OpenWeatherData(OpenWeatherBase):
         result = await self._json_request(url=url, params=params)
         return result
 
-    # TESTED
     @wrappers.model_return(model=models.OneCallAPIResponse)
     async def one_call(self, lat: float, lon: float, units: str) -> Dict[str, Any]:
         result = await self._basic_request(
@@ -69,13 +68,11 @@ class OpenWeatherData(OpenWeatherBase):
         )
         return result
 
-    # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution(self, lat: float, lon: float) -> Dict[str, Any]:
         result = await self._basic_request(url="/air_pollution", lat=lat, lon=lon)
         return result
 
-    # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution_forecast(self, lat: float, lon: float) -> Dict[str, Any]:
         result = await self._basic_request(
@@ -83,7 +80,6 @@ class OpenWeatherData(OpenWeatherBase):
         )
         return result
 
-    # NOT TESTED
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution_history(
         self, lon: float, lat: float, start: int, end: int
@@ -93,7 +89,6 @@ class OpenWeatherData(OpenWeatherBase):
         )
         return result
 
-    # NOT TESTED
     @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi(self, lat: float, lon: float) -> Dict[str, Any]:
         result = await self._basic_request(url="/uvi", lat=lat, lon=lon)
@@ -169,7 +164,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
         return result
 
 
-async def icon(self, icon_id: str) -> bytes:
+async def icon(icon_id: str) -> bytes:
     client = OpenWeatherBase(appid="")
     client.base_url = "http://openweathermap.org/img/wn"
     url = f"/{icon_id}@2x.png"
