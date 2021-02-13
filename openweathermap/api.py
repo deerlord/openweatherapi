@@ -128,7 +128,7 @@ class OpenWeatherMap(OpenWeatherBase):
         # enables map endpoints to accessed without repetitive code
         # for instance: map = self.clouds(x,y,z)
         if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
-            # returns a coro
+            # returns a callable coro
             return functools.partial(self._basic_request, f"{attr}_new")
         return super().__getattribute__(attr)
 
