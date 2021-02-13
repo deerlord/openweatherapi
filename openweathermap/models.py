@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class WeatherDataBaseModel(BaseModel):
     dt: int
 
+    """
     def data(self):
         return self.dict(exclude="dt")
 
@@ -24,6 +25,7 @@ class WeatherDataBaseModel(BaseModel):
         return {
             f"{field}_{key}": value for key, value in getattr(self, field, {}).items()
         }
+    """
 
 
 class Weather(BaseModel):
