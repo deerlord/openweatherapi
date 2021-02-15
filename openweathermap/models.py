@@ -165,9 +165,11 @@ class GeocodingAPIResponse(BaseModel):
     state: str = ""
 
 
+class Uvi(BaseModel):
+    dt: int
+    uvi: float
+
+
 class UviAPIResponse(BaseModel):
-    lat: float
-    lon: float
-    date_iso: str
-    date: int
-    value: float
+    coord: Coords
+    list: List[Uvi]

@@ -147,9 +147,8 @@ class TestOpenWeatherData(TestCase):
                 status=200,
             )
             result = asyncio.run(self.client.uvi_forecast(lat=0.0, lon=0.0, cnt=8))
-        results = [model.dict() for model in result]
         self.assertEqual(
-            results,
+            result,
             fixtures.UVI_FORECAST_API_RESPONSE,
             "Model did not match API response",
         )
