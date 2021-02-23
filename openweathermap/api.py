@@ -56,7 +56,11 @@ class OpenWeatherData(OpenWeatherBase):
     base_url = "https://api.openweathermap.org/data/2.5"
 
     async def _basic_request(self, url: str, lat: float, lon: float, **kwargs) -> Any:
-        params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
+        params = {
+            "lat": lat,
+            "lon": lon,
+            "appid": self.appid,
+        }  # type: Dict[str, Any]
         params.update(**kwargs)
         return await self._json_request(url=url, params=params)
 
@@ -70,16 +74,16 @@ class OpenWeatherData(OpenWeatherBase):
 
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
     async def air_pollution_forecast(self, lat: float, lon: float) -> Dict[str, Any]:
-        return await self._basic_request(
-            url="/air_pollution/forecast", lat=lat, lon=lon
-        )
+        return await self._basic_request(url="/air_pollution/forecast", lat=lat, lon=lon)
 
     @wrappers.model_return(model=models.AirPollutionAPIResponse)
-    async def air_pollution_history(
-        self, lon: float, lat: float, start: int, end: int
-    ) -> Dict[str, Any]:
+    async def air_pollution_history(self, lon: float, lat: float, start: int, end: int) -> Dict[str, Any]:
         return await self._basic_request(
-            url="/air_pollution/history", lat=lat, lon=lon, start=start, end=end
+            url="/air_pollution/history",
+            lat=lat,
+            lon=lon,
+            start=start,
+            end=end,
         )
 
     @wrappers.model_return(model=models.UviAPIResponse)
@@ -87,17 +91,18 @@ class OpenWeatherData(OpenWeatherBase):
         return await self._basic_request(url="/uvi", lat=lat, lon=lon)
 
     @wrappers.model_return(model=models.UviAPIResponse)
-    async def uvi_forecast(
-        self, lat: float, lon: float, cnt: int
-    ) -> List[Dict[str, Any]]:
+    async def uvi_forecast(self, lat: float, lon: float, cnt: int) -> List[Dict[str, Any]]:
         return await self._basic_request(url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt)
 
     @wrappers.model_return(model=models.UviAPIResponse)
-    async def uvi_history(
-        self, lat: float, lon: float, cnt: int, start: int, end: int
-    ) -> List[Dict[str, Any]]:
+    async def uvi_history(self, lat: float, lon: float, cnt: int, start: int, end: int) -> List[Dict[str, Any]]:
         return await self._basic_request(
-            url="/uvi/history", lat=lat, lon=lon, cnt=cnt, start=start, end=end
+            url="/uvi/history",
+            lat=lat,
+            lon=lon,
+            cnt=cnt,
+            start=start,
+            end=end,
         )
 
 
@@ -116,7 +121,13 @@ class OpenWeatherMap(OpenWeatherBase):
     def __getattribute__(self, attr) -> Any:
         # enables map endpoints to accessed without repetitive code
         # for instance: map = self.clouds(x,y,z)
-        if attr in ["clouds", "precipitation", "pressure", "wind", "temp"]:
+        if attr in [
+            "clouds",
+            "precipitation",
+            "pressure",
+            "wind",
+            "temp",
+        ]:
             # returns a callable coro
             return functools.partial(self._basic_request, f"{attr}_new")
         return super().__getattribute__(attr)
@@ -127,9 +138,7 @@ class OpenWeatherGeocoding(OpenWeatherBase):
     base_url = "https://api.openweathermap.org/geo/1.0"
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
-    async def geocode(
-        self, city: str, state: str, country: str, limit: int = None
-    ) -> List[Dict[str, Any]]:
+    async def geocode(self, city: str, state: str, country: str, limit: int = None) -> List[Dict[str, Any]]:
         params = {
             "appid": self.appid,
             "q": f"{city},{state},{country}",
@@ -139,10 +148,12 @@ class OpenWeatherGeocoding(OpenWeatherBase):
         return await self._json_request(url="/direct", params=params)
 
     @wrappers.model_return(model=models.GeocodingAPIResponse)
-    async def reverse(
-        self, lat: float, lon: float, limit: int = None
-    ) -> List[Dict[str, Any]]:
-        params = {"lat": lat, "lon": lon, "appid": self.appid}  # type: Dict[str, Any]
+    async def reverse(self, lat: float, lon: float, limit: int = None) -> List[Dict[str, Any]]:
+        params = {
+            "lat": lat,
+            "lon": lon,
+            "appid": self.appid,
+        }  # type: Dict[str, Any]
         if limit:
             params.update({"limit": limit})
         return await self._json_request(url="/reverse", params=params)
