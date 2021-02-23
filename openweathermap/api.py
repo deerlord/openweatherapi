@@ -8,6 +8,7 @@ import aiohttp  # type: ignore
 from openweathermap import exceptions, models, wrappers
 
 
+
 @dataclass
 class OpenWeatherBase:
     appid: str
