@@ -495,7 +495,7 @@ UVI_API_RESPONSE = {
 }
 
 
-UVI_FORECAST_API_RESPONSE = {
+UVI_LIST_API_RESPONSE = {
     "coord": {"lat": 50.0, "lon": 50.0},
     "list": [{"dt": 1234567890, "uvi": 10}, {"dt": 1234567891, "uvi": 11}],
 }

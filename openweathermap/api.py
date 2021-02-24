@@ -90,11 +90,11 @@ class OpenWeatherData(OpenWeatherBase):
     async def uvi(self, lat: float, lon: float) -> Dict[str, Any]:
         return await self._basic_request(url="/uvi", lat=lat, lon=lon)
 
-    @wrappers.model_return(model=models.UviAPIResponse)
+    @wrappers.model_return(model=models.UviListAPIResponse)
     async def uvi_forecast(self, lat: float, lon: float, cnt: int) -> List[Dict[str, Any]]:
         return await self._basic_request(url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt)
 
-    @wrappers.model_return(model=models.UviAPIResponse)
+    @wrappers.model_return(model=models.UviListAPIResponse)
     async def uvi_history(self, lat: float, lon: float, cnt: int, start: int, end: int) -> List[Dict[str, Any]]:
         return await self._basic_request(
             url="/uvi/history",

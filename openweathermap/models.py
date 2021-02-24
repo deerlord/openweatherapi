@@ -171,5 +171,13 @@ class Uvi(BaseModel):
 
 
 class UviAPIResponse(BaseModel):
+    lat: float
+    lon: float
+    date_iso: str
+    date: int
+    value: float
+
+
+class UviListAPIResponse(BaseModel):
     coord: Coords
     list: List[Uvi]

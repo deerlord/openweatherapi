@@ -19,9 +19,7 @@ class TestWrappers(TestCase):
             return EXAMPLE_MODEL_DICT
 
         result = asyncio.run(func())
-        self.assertDictEqual(
-            result.dict(), EXAMPLE_MODEL_DICT, "Incorrect dictionary returned"
-        )
+        self.assertDictEqual(result.dict(), EXAMPLE_MODEL_DICT, "Incorrect dictionary returned")
 
     def test_time_cache(self):
         # not sure how to test

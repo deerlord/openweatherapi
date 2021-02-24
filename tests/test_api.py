@@ -123,7 +123,6 @@ class TestOpenWeatherData(TestCase):
                 status=200,
             )
             result = asyncio.run(self.client.uvi(lat=0.0, lon=0.0))
-
         self.assertDictEqual(
             result.dict(),
             fixtures.UVI_API_RESPONSE,
@@ -134,13 +133,13 @@ class TestOpenWeatherData(TestCase):
         with responses() as resps:
             resps.get(
                 "https://api.openweathermap.org/data/2.5/uvi/forecast?" "appid=APPID&cnt=8&lat=0.0&lon=0.0",
-                payload=fixtures.UVI_FORECAST_API_RESPONSE,
+                payload=fixtures.UVI_LIST_API_RESPONSE,
                 status=200,
             )
             result = asyncio.run(self.client.uvi_forecast(lat=0.0, lon=0.0, cnt=8))
         self.assertEqual(
             result,
-            fixtures.UVI_FORECAST_API_RESPONSE,
+            fixtures.UVI_LIST_API_RESPONSE,
             "Model did not match API response",
         )
 
@@ -149,15 +148,14 @@ class TestOpenWeatherData(TestCase):
             resps.get(
                 "https://api.openweathermap.org/data/2.5/uvi/history?"
                 "appid=APPID&cnt=5&end=2&lat=0.0&lon=0.0&start=1",
-                payload=fixtures.UVI_HISTORY_API_RESPONSE,
+                payload=fixtures.UVI_LIST_API_RESPONSE,
                 status=200,
             )
-
+            self.maxDiff = None
             result = asyncio.run(self.client.uvi_history(lat=0.0, lon=0.0, cnt=5, start=1, end=2))
-        results = [model.dict() for model in result]
         self.assertEqual(
-            results,
-            fixtures.UVI_HISTORY_API_RESPONSE,
+            result,
+            fixtures.UVI_LIST_API_RESPONSE,
             "Model does not match API response",
         )
 
