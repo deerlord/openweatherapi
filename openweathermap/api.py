@@ -18,7 +18,7 @@ class OpenWeatherBase:
         url = url[1:] if url.startswith("/") else url
         return f"{self.base_url}/{url}"
 
-    @wrappers.time_cache
+    # @wrappers.time_cache
     async def _json_request(self, url: str, params: Dict[str, Any] = {}) -> Any:
         result = {}
         url = self._url_formatter(url)
@@ -32,7 +32,7 @@ class OpenWeatherBase:
                     raise exceptions.BadRequest(resp.status)
         return result
 
-    @wrappers.time_cache
+    # @wrappers.time_cache
     async def _binary_request(self, url: str, params: Dict[str, Any] = {}) -> bytes:
         result = b""
         url = self._url_formatter(url=url)
@@ -91,11 +91,11 @@ class OpenWeatherData(OpenWeatherBase):
         return await self._basic_request(url="/uvi", lat=lat, lon=lon)
 
     @wrappers.model_return(model=models.UviListAPIResponse)
-    async def uvi_forecast(self, lat: float, lon: float, cnt: int) -> List[Dict[str, Any]]:
+    async def uvi_forecast(self, lat: float, lon: float, cnt: int) -> Dict[str, Any]:
         return await self._basic_request(url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt)
 
     @wrappers.model_return(model=models.UviListAPIResponse)
-    async def uvi_history(self, lat: float, lon: float, cnt: int, start: int, end: int) -> List[Dict[str, Any]]:
+    async def uvi_history(self, lat: float, lon: float, cnt: int, start: int, end: int) -> Dict[str, Any]:
         return await self._basic_request(
             url="/uvi/history",
             lat=lat,
