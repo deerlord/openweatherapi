@@ -161,7 +161,7 @@ class GeocodingAPIResponse(BaseModel):
     lat: float
     lon: float
     country: str = ""
-    local_names: dict
+    local_names: dict = {}
     state: str = ""
 
 

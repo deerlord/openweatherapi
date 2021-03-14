@@ -133,13 +133,13 @@ class TestOpenWeatherData(TestCase):
         with responses() as resps:
             resps.get(
                 "https://api.openweathermap.org/data/2.5/uvi/forecast?" "appid=APPID&cnt=8&lat=0.0&lon=0.0",
-                payload=fixtures.UVI_LIST_API_RESPONSE,
+                payload=fixtures.UVI_FORECAST_API_RESPONSE,
                 status=200,
             )
             result = asyncio.run(self.client.uvi_forecast(lat=0.0, lon=0.0, cnt=8))
         self.assertEqual(
             result,
-            fixtures.UVI_LIST_API_RESPONSE,
+            fixtures.UVI_FORECAST_API_RESPONSE,
             "Model did not match API response",
         )
 

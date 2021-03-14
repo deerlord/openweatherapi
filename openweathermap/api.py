@@ -90,7 +90,7 @@ class OpenWeatherData(OpenWeatherBase):
     async def uvi(self, lat: float, lon: float) -> Dict[str, Any]:
         return await self._basic_request(url="/uvi", lat=lat, lon=lon)
 
-    @wrappers.model_return(model=models.UviListAPIResponse)
+    @wrappers.model_return(model=models.UviAPIResponse)
     async def uvi_forecast(self, lat: float, lon: float, cnt: int) -> Dict[str, Any]:
         return await self._basic_request(url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt)
 

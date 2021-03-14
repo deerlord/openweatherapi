@@ -501,7 +501,7 @@ UVI_LIST_API_RESPONSE = {
 }
 
 
-UVI_HISTORY_API_RESPONSE = [
+UVI_FORECAST_API_RESPONSE = [
     {
         "lat": 37.75,
         "lon": -122.37,
