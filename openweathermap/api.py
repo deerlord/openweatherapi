@@ -91,7 +91,7 @@ class OpenWeatherData(OpenWeatherBase):
         return await self._basic_request(url="/uvi", lat=lat, lon=lon)
 
     @wrappers.model_return(model=models.UviAPIResponse)
-    async def uvi_forecast(self, lat: float, lon: float, cnt: int) -> Dict[str, Any]:
+    async def uvi_forecast(self, lat: float, lon: float, cnt: int) -> List[Dict[str, Any]]:
         return await self._basic_request(url="/uvi/forecast", lat=lat, lon=lon, cnt=cnt)
 
     @wrappers.model_return(model=models.UviListAPIResponse)
@@ -163,4 +163,5 @@ async def icon(icon_id: str) -> bytes:
     client = OpenWeatherBase(appid="")
     client.base_url = "http://openweathermap.org/img/wn"
     url = f"/{icon_id}@2x.png"
-    return await client._binary_request(url=url)
+    binary = await client._binary_request(url=url)
+    return binary
